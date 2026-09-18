@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Test</title>
+
+
+  <style>
+    body {
+      background-color: #444;
+      display: grid;
+      place-content: center;
+      font-size: 1.3rem;
+    }
+
+
+    .btn {
+      font-size: inherit;
+      color: #fafafa;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 2px solid #4444;
+      background: #252525;
+      box-shadow: 1px 1px #444;
+      cursor: pointer;
+      user-select: none;
+      margin: 10px;
+    }
+
+    .btn:hover {
+      transform: scale(1.1);
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #test {
+      font-size: inherit;
+      margin-top: 100px;
+      color: #fafafa;
+    }
+  </style>
+</head>
+
+<body>
+  <button class="btn" id="btn-play">Grabar audio</button>
+  <button class="btn" id="btn-stop" disabled>Parar audio</button>
+
+  <div id="test"></div>
+
+
+  <script type="module">
+    const ws = new WebSocket("ws://localhost:8765");
+    const playBtn = document.querySelector("#btn-play");
+    const stopBtn = document.querySelector("#btn-stop");
+    const test = document.querySelector("#test");
+
+    const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(audioStream);
+
+    ws.addEventListener("open", (ev) => {
+      console.log("Conectando...");
+    });
+
+    ws.addEventListener("message", (ev) => {
+      console.log(`Mensaje recibido: ${ev.data}`);
+      test.textContent = ev.data;
+    });
+
+    ws.addEventListener("error", (ev) => {
+      console.error(`Error: ${ev}`);
+    });
+
+    ws.addEventListener("close", (event) => {
+      console.log(`Conexión cerrada\nCódigo: ${event.code}\nRazón: ${event.reason}`);
+    });
+
+    playBtn.addEventListener("click", startAudio);
+    stopBtn.addEventListener("click", stopAudio);
+
+    async function startAudio() {
+      mediaRecorder.addEventListener("dataavailable", (ev) => {
+        console.log(ev.data);
+        ws.send(ev.data);
+      });
+
+      mediaRecorder.start();
+
+      playBtn.disabled = true;
+      stopBtn.disabled = false;
+    }
+
+    function stopAudio() {
+      mediaRecorder.stop();
+      playBtn.disabled = false;
+      stopBtn.disabled = true;
+    }
+
+  </script>
+</body>
+
+<!--
+https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/dataavailable_event
+-->
+
+</html>
