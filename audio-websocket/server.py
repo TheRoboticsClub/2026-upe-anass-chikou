@@ -1,21 +1,30 @@
-#!/usr/bin/env python
-
-"""Echo server using the asyncio API."""
-
 import asyncio
+import whisper
+
 from websockets.asyncio.server import serve
+
+model = whisper.load_model("small")
 
 async def processMessage(websocket):
   async for message in websocket:
-    if type(message) == bytes:
-      print(f"Recibido audio: {len(message)} bytes...")
-      with open("audio.webm", "wb") as audio_file:
-        audio_file.write(message)
-    elif type(message) == str:
-      print("Recibido: ", message)
-    else:
-      print(f"Tipo desconocido: {type(message)}")
-    await websocket.send("Mensaje recibido por el servidor")
+    try:
+      
+      if type(message) == bytes:
+        filename = "audio.webm"
+        print(f"Recibido audio: {len(message)} bytes...")
+        with open(filename, "wb") as audio_file:
+          audio_file.write(message)
+        
+        result = await asyncio.to_thread(model.transcribe, filename, language="es")
+        print(result["text"])
+        
+        await websocket.send(result["text"])
+      elif type(message) == str:
+        print("Recibido: ", message)
+      else:
+        print(f"Tipo desconocido: {type(message)}")
+    except Exception as ex:
+      print(f"Error: {ex}")
 
 async def main():
   print("Servidor WebSocket inicializado...")

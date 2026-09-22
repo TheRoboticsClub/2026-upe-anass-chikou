@@ -81,15 +81,15 @@
       console.log(`Conexión cerrada\nCódigo: ${event.code}\nRazón: ${event.reason}`);
     });
 
+    mediaRecorder.addEventListener("dataavailable", (ev) => {
+      console.log(ev.data);
+      ws.send(ev.data);
+    });
+
     playBtn.addEventListener("click", startAudio);
     stopBtn.addEventListener("click", stopAudio);
 
-    async function startAudio() {
-      mediaRecorder.addEventListener("dataavailable", (ev) => {
-        console.log(ev.data);
-        ws.send(ev.data);
-      });
-
+    function startAudio() {
       mediaRecorder.start();
 
       playBtn.disabled = true;
