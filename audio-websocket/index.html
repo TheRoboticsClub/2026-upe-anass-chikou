@@ -15,6 +15,25 @@
       font-size: 1.3rem;
     }
 
+    main {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 100px;
+    }
+
+    .others {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
 
     .btn {
       font-size: inherit;
@@ -42,23 +61,32 @@
 
     #test {
       font-size: inherit;
-      margin-top: 100px;
+      margin-bottom: 100px;
       color: #fafafa;
     }
   </style>
 </head>
 
 <body>
-  <button class="btn" id="btn-play">Grabar audio</button>
-  <button class="btn" id="btn-stop" disabled>Parar audio</button>
+  <main>
+    <div class="buttons">
+      <button class="btn" id="btn-play">Grabar audio</button>
+      <button class="btn" id="btn-stop" disabled>Parar audio</button>
 
-  <div id="test"></div>
+    </div>
+    <div class="others">
+      <div id="test">asdsad</div>
+
+      <audio class="audio" src="" controls></audio>
+    </div>
+  </main>
 
 
   <script type="module">
     const ws = new WebSocket("ws://localhost:8765");
     const playBtn = document.querySelector("#btn-play");
     const stopBtn = document.querySelector("#btn-stop");
+    const audio = document.querySelector(".audio")
     const test = document.querySelector("#test");
 
     const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -81,9 +109,10 @@
       console.log(`Conexión cerrada\nCódigo: ${event.code}\nRazón: ${event.reason}`);
     });
 
-    mediaRecorder.addEventListener("dataavailable", (ev) => {
-      console.log(ev.data);
-      ws.send(ev.data);
+    mediaRecorder.addEventListener("dataavailable", ({ data }) => {
+      console.log(data);
+      ws.send(data);
+      audio.src = URL.createObjectURL(data);
     });
 
     playBtn.addEventListener("click", startAudio);
@@ -104,10 +133,5 @@
 
   </script>
 </body>
-
-<!--
-https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
-https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/dataavailable_event
--->
 
 </html>
