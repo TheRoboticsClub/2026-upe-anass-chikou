@@ -29,7 +29,7 @@ async function startAudio() {
   audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
   audioContext = new AudioContext({ sampleRate: 16000 });
-  await audioContext.audioWorklet.addModule("worklet.js");
+  await audioContext.audioWorklet.addModule("/worklet.js");
   audioSource = audioContext.createMediaStreamSource(audioStream);
 
   // AudioWorletNode - audio crudo (HTPPS)
