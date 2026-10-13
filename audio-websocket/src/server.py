@@ -4,6 +4,7 @@ import torch
 from faster_whisper import WhisperModel
 from websockets.asyncio.server import serve
 
+
 # Code taken from and inspired by [DialoStack](https://github.com/aquintan4/DialoStack)
 class SpeechToText:
     def __init__(self):
